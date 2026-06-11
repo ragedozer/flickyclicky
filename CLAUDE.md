@@ -24,13 +24,13 @@ A daily web-based clicking speed and accuracy game. Each day everyone in the wor
 - Inner ring: 75 pts
 - Mid ring: 50 pts
 - Outer ring: 25 pts
-- Speed bonus: additive, up to 100 pts, decaying exponentially with reaction time
-  (`SPEED_BONUS_PEAK * e^(-reactionMs / SPEED_DECAY_MS)`) — rewards fast "flick" clicks
-  even on lower-value rings, e.g. an instant outer-ring hit (25 + ~100 = 125) can beat a
-  slow bullseye (100 + ~4 = 104)
+- Speed bonus: additive, up to 250 pts, decaying exponentially with reaction time
+  (`SPEED_BONUS_PEAK * e^(-reactionMs / SPEED_DECAY_MS)`) — heavily rewards fast "flick"
+  clicks, e.g. a quick outer-ring flick at 400ms (25 + ~80 = 105) beats a bullseye held
+  to the last second at 1900ms (100 + ~1 = 101)
 - Moving-target bonus: (base + speed bonus) is multiplied by `TYPE_SCORE_MULT`
   (drifter ×1.2, flyby ×1.35, popup ×1) — rewards hitting harder, moving targets
-- Max possible per target: 200 pts (popup bullseye + instant); higher for drifter/flyby
+- Max possible per target: 350 pts (popup bullseye + instant); higher for drifter/flyby
 - Max total (18 targets): 3600 pts (running total is clamped to this cap)
 
 ## Daily Seed System
@@ -210,12 +210,13 @@ SPAWN_GAP_MAX = 2000
 BURST_GAP_MIN = 0                 // nearly-simultaneous burst gap
 BURST_GAP_MAX = 180
 BURST_CHANCE = 0.28               // ~28% of gaps are bursts (multiple targets on screen)
-SPEED_BONUS_PEAK = 100            // max additive speed bonus, awarded near-instantly
-SPEED_DECAY_MS = 600              // exponential decay time constant (ms) for speed bonus
+SPEED_BONUS_PEAK = 250            // max additive speed bonus, awarded near-instantly
+SPEED_DECAY_MS = 350              // exponential decay time constant (ms) for speed bonus
 TYPE_SCORE_MULT = { popup: 1, drifter: 1.2, flyby: 1.35 } // moving-target score multiplier
 MISS_PENALTY = 50                 // pts deducted per miss (click-miss or expiry), score floors at 0
 TARGET_RADIUS = 44                // px, base target size
 RING_RADII = [10, 20, 32, 44]    // px radii for each ring zone (bullseye→outer)
+MIN_SPAWN_DIST = TARGET_RADIUS * 2.2 // popups can't spawn overlapping another active popup
 LB_NAME_MAX_LEN = 16              // max chars for leaderboard display name
 LB_COLLECTION = 'leaderboard_days' // Firestore root collection for daily leaderboards
 ```

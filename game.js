@@ -26,8 +26,8 @@ const SPAWN_GAP_MAX       = 2000;
 const BURST_GAP_MIN       = 0;    // targets that nearly overlap
 const BURST_GAP_MAX       = 180;
 const BURST_CHANCE        = 0.28; // ~28% of gaps are bursts
-const SPEED_BONUS_PEAK    = 100;  // max speed bonus, awarded near-instantly
-const SPEED_DECAY_MS      = 600;  // exponential decay time constant (ms)
+const SPEED_BONUS_PEAK    = 250;  // max speed bonus, awarded near-instantly
+const SPEED_DECAY_MS      = 350;  // exponential decay time constant (ms)
 const TYPE_SCORE_MULT     = { popup: 1, drifter: 1.2, flyby: 1.35 }; // moving-target bonus
 const DRIFTER_SPEED_RANGE = [90, 160];
 const FLYBY_SPEED_RANGE   = [250, 380];
@@ -98,6 +98,17 @@ function rngShuffle(rng, arr) {
 
 // ── Round generation ──────────────────────────────────────────────────────────
 
+const MIN_SPAWN_DIST = TARGET_RADIUS * 2.2; // stationary popups must not overlap on spawn
+
+function overlapsExistingPopup(x, y, spawnTime, duration, targets) {
+  for (const t of targets) {
+    if (t.type !== 'popup') continue;
+    const overlapsInTime = spawnTime < t.spawnTime + t.duration && t.spawnTime < spawnTime + duration;
+    if (overlapsInTime && Math.hypot(x - t.x, y - t.y) < MIN_SPAWN_DIST) return true;
+  }
+  return false;
+}
+
 function generateRound(rng) {
   const types   = rngShuffle(rng, TYPE_POOL);
   const targets = [];
@@ -112,12 +123,13 @@ function generateRound(rng) {
       : rngRange(rng, SPAWN_GAP_MIN, SPAWN_GAP_MAX);
 
     if (type === 'popup') {
-      targets.push({
-        type, spawnTime,
-        x: rngRange(rng, TARGET_RADIUS + 30, CANVAS_W - TARGET_RADIUS - 30),
-        y: rngRange(rng, TARGET_RADIUS + 30, CANVAS_H - TARGET_RADIUS - 30),
-        duration: POPUP_DURATION,
-      });
+      let x, y, attempts = 0;
+      do {
+        x = rngRange(rng, TARGET_RADIUS + 30, CANVAS_W - TARGET_RADIUS - 30);
+        y = rngRange(rng, TARGET_RADIUS + 30, CANVAS_H - TARGET_RADIUS - 30);
+        attempts++;
+      } while (overlapsExistingPopup(x, y, spawnTime, POPUP_DURATION, targets) && attempts < 20);
+      targets.push({ type, spawnTime, x, y, duration: POPUP_DURATION });
     } else {
       const speedRange = type === 'flyby' ? FLYBY_SPEED_RANGE : DRIFTER_SPEED_RANGE;
       const speed = rngRange(rng, speedRange[0], speedRange[1]);
