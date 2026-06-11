@@ -507,12 +507,12 @@ function formatDateStr(key) {
   return `${months[m-1]} ${d}, ${y}`;
 }
 
-function buildShareText(result, dateStr) {
+function buildShareText(result, dateStr, isPractice) {
   const emojis = result.targets.map(t => t.ringIndex != null ? RING_EMOJI[t.ringIndex] : MISS_EMOJI);
   const rows   = [];
   for (let i = 0; i < emojis.length; i += 9) rows.push(emojis.slice(i, i+9).join(''));
   return [
-    `Daily Shooter — ${dateStr}`,
+    isPractice ? 'Daily Shooter — Practice Round' : `Daily Shooter — ${dateStr}`,
     `Score: ${result.totalScore} / ${MAX_SCORE} (${result.grade})`,
     rows.join('\n'),
     '',
@@ -942,7 +942,7 @@ function showResults(result, playFanfare = false) {
   const shareConfirm = document.getElementById('share-confirm');
   const shareLabel   = document.getElementById('share-btn-label');
   shareBtn.onclick = () => {
-    const text = buildShareText(result, dateStr);
+    const text = buildShareText(result, dateStr, isPractice);
     navigator.clipboard.writeText(text).then(() => {
       shareLabel.textContent = 'Copied!';
       shareConfirm.classList.add('show');

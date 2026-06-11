@@ -220,6 +220,11 @@ canvas {
 
 #already-played-msg { color: var(--accent2) !important; }
 
+#game-tagline {
+  font-size: 12px;
+  margin-top: -8px;
+}
+
 .hint-text {
   font-size: 11px;
   color: var(--border) !important;
