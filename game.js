@@ -1233,6 +1233,7 @@ function init() {
     prevGrade.textContent  = existing.grade;
     prevGrade.className    = `grade-${existing.grade}`;
     prevScore.textContent  = `${existing.totalScore.toLocaleString()} / ${MAX_SCORE.toLocaleString()}`;
+    document.getElementById('start-btn').textContent = 'View Scores';
   }
 
   state     = 'idle';
