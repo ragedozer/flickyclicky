@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="theme-color" content="#0a0a0f" />
+  <title>Daily Shooter</title>
+  <meta name="description" content="A daily clicking accuracy game. One attempt per day. Share your score." />
+  <meta property="og:title" content="Daily Shooter" />
+  <meta property="og:description" content="Test your speed and accuracy. One shot at glory per day." />
+  <meta property="og:type" content="website" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+  <!-- Top controls -->
+  <div id="top-controls">
+    <button class="icon-btn" id="mute-btn" type="button" aria-label="Mute sounds" title="Mute sounds">🔊</button>
+    <button class="icon-btn" id="theme-btn" type="button" aria-label="Toggle light/dark theme" title="Toggle light/dark theme">🌙</button>
+  </div>
+
+  <!-- HUD -->
+  <div id="hud">
+    <div id="hud-left">
+      <span class="hud-label">Score</span>
+      <span class="hud-value" id="score-display">0</span>
+    </div>
+    <div id="hud-center">
+      <span class="hud-label">Progress</span>
+      <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+      <div id="type-legend">
+        <span><span class="legend-dot dot-popup"></span>Pop-up</span>
+        <span><span class="legend-dot dot-drifter"></span>Drifter</span>
+        <span><span class="legend-dot dot-flyby"></span>Flyby</span>
+      </div>
+    </div>
+    <div id="hud-right">
+      <span class="hud-label">Left</span>
+      <span class="hud-value" id="targets-remaining">—</span>
+    </div>
+  </div>
+
+  <!-- Game canvas -->
+  <div id="game-wrap">
+    <canvas id="game-canvas" aria-label="Game canvas — click targets to score"></canvas>
+    <div id="miss-flash"></div>
+
+    <!-- Start overlay -->
+    <div class="overlay fade-in" id="start-overlay">
+      <h1>Daily Shooter</h1>
+      <p>Click targets fast and accurately.<br>Center = more points &nbsp;·&nbsp; Faster = bonus.</p>
+      <div id="start-today-result" style="display:none">
+        <div id="start-prev-grade"></div>
+        <div id="start-prev-score"></div>
+      </div>
+      <p id="already-played-msg" style="display:none">You already played today — replay is practice only.</p>
+      <div class="overlay-actions">
+        <button class="btn btn-primary" id="start-btn">Play Today's Round</button>
+        <button class="btn btn-secondary" id="practice-btn">Practice Mode</button>
+      </div>
+      <p class="hint-text">Press <kbd>Space</kbd> to play</p>
+    </div>
+
+    <!-- Countdown overlay -->
+    <div class="overlay hidden" id="countdown-overlay">
+      <div id="countdown-number">3</div>
+    </div>
+
+    <!-- Results overlay -->
+    <div class="overlay hidden fade-in" id="results-overlay">
+      <div id="results-scroll">
+
+        <div id="result-header">
+          <div id="result-date"></div>
+          <div id="result-grade-wrap">
+            <div id="result-grade"></div>
+            <div id="result-score-animated"></div>
+          </div>
+          <div id="emoji-grid"></div>
+        </div>
+
+        <div id="result-stats">
+          <div class="stat-cell">
+            <span class="stat-label">Accuracy</span>
+            <span class="stat-value" id="stat-acc"></span>
+          </div>
+          <div class="stat-cell">
+            <span class="stat-label">Speed bonus</span>
+            <span class="stat-value" id="stat-spd"></span>
+          </div>
+          <div class="stat-cell">
+            <span class="stat-label">Hits</span>
+            <span class="stat-value" id="stat-hits"></span>
+          </div>
+          <div class="stat-cell">
+            <span class="stat-label">Avg react</span>
+            <span class="stat-value" id="stat-react"></span>
+          </div>
+          <div class="stat-cell">
+            <span class="stat-label">Miss penalty</span>
+            <span class="stat-value" id="stat-pen" style="color:var(--accent)"></span>
+          </div>
+        </div>
+
+        <div id="breakdown-section">
+          <div id="breakdown-header">
+            <span>Per-target breakdown</span>
+            <button id="breakdown-toggle" class="btn-link">show ▾</button>
+          </div>
+          <div id="breakdown-table" class="hidden"></div>
+        </div>
+
+        <div id="leaderboard-section">
+          <div id="leaderboard-header">
+            <span>Today's Leaderboard</span>
+          </div>
+          <form id="lb-entry-form">
+            <input id="lb-name-input" type="text" maxlength="16" placeholder="Enter your name" autocomplete="off" />
+            <button id="lb-submit-btn" class="btn btn-primary" type="submit">Submit Score</button>
+          </form>
+          <div id="lb-status"></div>
+          <div id="lb-rank-info"></div>
+          <div id="lb-list-wrap">
+            <div id="lb-list"></div>
+          </div>
+        </div>
+
+        <div class="result-actions">
+          <button id="share-btn" class="btn btn-primary">
+            <span id="share-btn-label">Copy Score</span>
+            <div id="share-confirm">Copied!</div>
+          </button>
+          <button class="btn btn-secondary" id="replay-btn">Play Again</button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 7-day history -->
+  <div id="history-strip"></div>
+
+  <script src="game.js"></script>
+</body>
+</html>
