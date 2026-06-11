@@ -544,7 +544,7 @@ function buildShareText(result, dateStr, isPractice) {
   const rows   = [];
   for (let i = 0; i < emojis.length; i += 9) rows.push(emojis.slice(i, i+9).join(''));
   return [
-    isPractice ? 'Daily Shooter — Practice Round' : `Daily Shooter — ${dateStr}`,
+    isPractice ? 'FlickyClicky — Practice Round' : `FlickyClicky — ${dateStr}`,
     `Score: ${result.totalScore} / ${MAX_SCORE} (${result.grade})`,
     rows.join('\n'),
     '',

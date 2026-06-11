@@ -1,4 +1,4 @@
-# Daily Shooter — Project Brief
+# FlickyClicky — Project Brief
 
 ## What This Is
 
@@ -7,8 +7,8 @@ A daily web-based clicking speed and accuracy game. Each day everyone in the wor
 ## Core Mechanics
 
 - **15–18 targets** per round (tuned to ~60 seconds)
-- **Accuracy score**: distance from center on click → concentric ring zones (bullseye = max points)
-- **Speed score**: time between target appearance and click → faster = bonus points, up to a cap
+- **Accuracy**: distance from center on click → concentric ring zones (bullseye = best multiplier)
+- **Speed**: time between target appearance and click is the primary score driver — faster = exponentially more points, up to a cap
 - **Miss**: clicking when no target is present costs nothing but wastes time
 - **No ammo limit** — click freely, only hits on active targets score
 
@@ -34,6 +34,8 @@ of it.
 - Total per hit: `round(speedScore * accuracyMult * typeMult)`.
 - Max possible per target: 405 pts (flyby bullseye + instant, 200 × 1.5 × 1.35); popup
   bullseye + instant is 300.
+- Miss penalty: `MISS_PENALTY` (50 pts) deducted per miss (click-miss or expiry);
+  running score floors at 0.
 - Max total (18 targets): 3600 pts (running total is clamped to this cap)
 
 ## Daily Seed System
@@ -41,8 +43,23 @@ of it.
 - Seed = `YYYY-MM-DD` string → simple hash → deterministic RNG (mulberry32)
 - Seed controls: target count, types, spawn positions, timing gaps, movement directions/speeds
 - Same seed → same game for every player on that day
-- "Already played" gate: stores today's date + score in localStorage
-- Players can replay after seeing results but score is locked on first completion
+- "Already played" gate: stores today's date + score in localStorage; shows prior
+  result directly and a reset countdown to local midnight on revisit
+- Players can replay after seeing results (practice mode) but the daily score is
+  locked on first completion
+
+## Results Screen Breakdown
+
+- **Stat row**: Speed Pts (sum of per-hit speed scores), Accuracy Mod (average
+  accuracy multiplier across hits, shown as a ± percentage), Hits (n/18), Avg React
+  (average reaction time), Miss Penalty (total pts deducted)
+- **Per-target breakdown table** (expandable): row per target showing index, emoji
+  (ring tier or miss), type (pop/drft/fly), reaction time, and points earned/deducted.
+  Point color tiers: `pts-max` ≥250, `pts-high` ≥120, `pts-mid` below that, `pts-miss`
+  for misses. The single best-scoring target is highlighted.
+- Animated score count-up with fanfare sounds per grade; letter grade with pop
+  animation
+- 7-day history strip from localStorage (shows score under grade, today highlighted)
 
 ## Share Feature
 
@@ -50,12 +67,13 @@ of it.
   - 🎯 bullseye, ✅ inner, 🟡 mid, ⭕ outer, ❌ miss
 - Copy text format:
   ```
-  Daily Shooter — June 9 2026
+  FlickyClicky — June 9, 2026
   Score: 2840 / 3600 (A)
   🎯✅🎯🟡✅🎯❌🎯✅✅🎯🟡🎯✅🎯
 
-  Play at: https://placeholder.url
+  Play at: https://flickyclicky.vercel.app/
   ```
+  (practice rounds use "FlickyClicky — Practice Round" and omit the date)
 - Button copies to clipboard, shows "Copied!" confirmation
 
 ## Grade Tiers
@@ -75,6 +93,7 @@ of it.
 - **HTML5 Canvas** for game rendering
 - **Web Audio API** for synthesized sound effects (no audio files)
 - **localStorage** for daily result persistence and 7-day history
+- **Firebase Firestore** (compat SDK via `<script>` tags) for the global daily leaderboard
 - Deployable to any static host (Netlify, Vercel, GitHub Pages)
 
 ## File Structure
@@ -83,22 +102,22 @@ of it.
 /
 ├── index.html       # Shell, HUD elements, overlay screens
 ├── style.css        # Layout, overlays, UI styling
-├── game.js          # All game logic, rendering, scoring, sharing
+├── game.js          # All game logic, rendering, scoring, sharing, leaderboard
 └── CLAUDE.md        # This file
 ```
 
 ## Build Plan
 
-### Phase 1 — Core Gameplay
+### Phase 1 — Core Gameplay ✅ complete
 
-**Sprint 1: Game Engine** ✅ complete
+**Sprint 1: Game Engine** ✅
 - Canvas renderer
 - Target spawning (pop-up type first)
 - Click detection + distance-from-center scoring
 - Speed scoring
 - Basic HUD
 
-**Sprint 2: Target Variety & Feel**
+**Sprint 2: Target Variety & Feel** ✅
 - Drifter and Flyby target types
 - Hit feedback: ring burst animation, score popup at click point
 - Miss flash
@@ -116,7 +135,7 @@ of it.
 **Sprint 4: Scoring & Results Screen** ✅
 - Per-target breakdown table (type, emoji, reaction time, points; expandable)
 - Animated score count-up with fanfare sounds per grade
-- Stats row: accuracy pts, speed bonus, hits, avg reaction time
+- Stats row: speed pts, accuracy mod, hits, avg reaction time, miss penalty
 - Letter grade with pop animation
 - 7-day history from localStorage (shows score under grade, today highlighted)
 
@@ -203,6 +222,13 @@ service cloud.firestore {
 - `SHARE_URL` in `game.js` updated to the live URL
 - Open Graph + Twitter card meta tags added to `index.html`
 
+### Branding ✅ complete
+
+- Page `<title>`, Open Graph/Twitter meta titles, on-screen `<h1>`, and share text all
+  read "FlickyClicky" (formerly "Daily Shooter").
+- `.overlay h1` is centered (`text-align: center`) so the title stays centered if it
+  wraps to two lines on narrow/mobile viewports.
+
 ## Key Constants (tunable)
 
 ```js
@@ -221,13 +247,14 @@ MISS_PENALTY = 50                 // pts deducted per miss (click-miss or expiry
 TARGET_RADIUS = 44                // px, base target size
 RING_RADII = [10, 20, 32, 44]    // px radii for each ring zone (bullseye→outer)
 MIN_SPAWN_DIST = TARGET_RADIUS * 2.2 // popups can't spawn overlapping another active popup
+MAX_SCORE = 3600                  // fixed cap for grading, HUD, share text, and leaderboard rule
 LB_NAME_MAX_LEN = 16              // max chars for leaderboard display name
 LB_COLLECTION = 'leaderboard_days' // Firestore root collection for daily leaderboards
 ```
 
 Note: `activeIndices` is an array — multiple targets can be on screen simultaneously during bursts. Click detection picks the closest active target to the click point.
 
-## URL Placeholder
+## Deployed URL
 
-Until deployed, share text uses: `https://placeholder.url`
-Replace with real URL in `game.js` → `SHARE_URL` constant.
+Live at: `https://flickyclicky.vercel.app/` — set as `SHARE_URL` in `game.js` and used
+in Open Graph/Twitter meta tags in `index.html`.
