@@ -28,6 +28,7 @@ const BURST_GAP_MAX       = 180;
 const BURST_CHANCE        = 0.28; // ~28% of gaps are bursts
 const SPEED_BONUS_PEAK    = 100;  // max speed bonus, awarded near-instantly
 const SPEED_DECAY_MS      = 600;  // exponential decay time constant (ms)
+const TYPE_SCORE_MULT     = { popup: 1, drifter: 1.2, flyby: 1.35 }; // moving-target bonus
 const DRIFTER_SPEED_RANGE = [90, 160];
 const FLYBY_SPEED_RANGE   = [250, 380];
 const CANVAS_W            = 700;
@@ -452,14 +453,15 @@ function drawTarget(ctx, tgt, idx, elapsed, scale) {
 
 // ── Scoring ───────────────────────────────────────────────────────────────────
 
-function scoreHit(distFromCenter, reactionMs) {
+function scoreHit(distFromCenter, reactionMs, type) {
   let ringIndex = RING_RADII.length - 1;
   for (let i = 0; i < RING_RADII.length; i++) {
     if (distFromCenter <= RING_RADII[i]) { ringIndex = i; break; }
   }
-  const base      = RING_POINTS[ringIndex];
+  const base       = RING_POINTS[ringIndex];
   const speedBonus = SPEED_BONUS_PEAK * Math.exp(-Math.max(0, reactionMs) / SPEED_DECAY_MS);
-  return { ringIndex, base, speedBonus, total: Math.round(base + speedBonus) };
+  const typeMult   = TYPE_SCORE_MULT[type] ?? 1;
+  return { ringIndex, base, speedBonus, total: Math.round((base + speedBonus) * typeMult) };
 }
 
 function calcGrade(score) {
@@ -639,8 +641,8 @@ function onCanvasClick(e) {
   if (hitIdx < 0 || hitDist > TARGET_RADIUS + 8) { onMiss(); return; }
 
   const tgt    = targets[hitIdx];
-  const result = scoreHit(hitDist, hitAge);
-  score += result.total;
+  const result = scoreHit(hitDist, hitAge, tgt.type);
+  score = Math.min(MAX_SCORE, score + result.total);
   combo++;
   missStreak = 0;
   hitLog.push({ ringIndex: result.ringIndex, score: result.total, reactionMs: hitAge, type: tgt.type });
@@ -1214,6 +1216,7 @@ document.getElementById('start-btn').addEventListener('click', () => {
   ensureAudio();
   const existing = loadTodayResult();
   if (existing) {
+    isPractice = false;
     startOverlay.classList.add('hidden');
     showResults(existing, false);
     return;
