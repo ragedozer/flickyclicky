@@ -26,8 +26,8 @@ const SPAWN_GAP_MAX       = 2000;
 const BURST_GAP_MIN       = 0;    // targets that nearly overlap
 const BURST_GAP_MAX       = 180;
 const BURST_CHANCE        = 0.28; // ~28% of gaps are bursts
-const SPEED_BONUS_MAX_MS  = 350;
-const SPEED_BONUS_MIN_MS  = 2000;
+const SPEED_BONUS_PEAK    = 100;  // max speed bonus, awarded near-instantly
+const SPEED_DECAY_MS      = 600;  // exponential decay time constant (ms)
 const DRIFTER_SPEED_RANGE = [90, 160];
 const FLYBY_SPEED_RANGE   = [250, 380];
 const CANVAS_W            = 700;
@@ -458,10 +458,8 @@ function scoreHit(distFromCenter, reactionMs) {
     if (distFromCenter <= RING_RADII[i]) { ringIndex = i; break; }
   }
   const base      = RING_POINTS[ringIndex];
-  const speedFrac = Math.max(0, Math.min(1,
-    1 - (reactionMs - SPEED_BONUS_MAX_MS) / (SPEED_BONUS_MIN_MS - SPEED_BONUS_MAX_MS)
-  ));
-  return { ringIndex, base, multiplier: 1 + speedFrac, total: Math.round(base * (1 + speedFrac)) };
+  const speedBonus = SPEED_BONUS_PEAK * Math.exp(-Math.max(0, reactionMs) / SPEED_DECAY_MS);
+  return { ringIndex, base, speedBonus, total: Math.round(base + speedBonus) };
 }
 
 function calcGrade(score) {

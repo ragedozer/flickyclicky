@@ -24,7 +24,10 @@ A daily web-based clicking speed and accuracy game. Each day everyone in the wor
 - Inner ring: 75 pts
 - Mid ring: 50 pts
 - Outer ring: 25 pts
-- Speed multiplier: 1.0x–2.0x (2x if clicked within 300ms of appearance, scales down to 1x at 2000ms)
+- Speed bonus: additive, up to 100 pts, decaying exponentially with reaction time
+  (`SPEED_BONUS_PEAK * e^(-reactionMs / SPEED_DECAY_MS)`) — rewards fast "flick" clicks
+  even on lower-value rings, e.g. an instant outer-ring hit (25 + ~100 = 125) can beat a
+  slow bullseye (100 + ~4 = 104)
 - Max possible per target: 200 pts (bullseye + instant)
 - Max total (18 targets): 3600 pts
 
@@ -205,8 +208,8 @@ SPAWN_GAP_MAX = 2000
 BURST_GAP_MIN = 0                 // nearly-simultaneous burst gap
 BURST_GAP_MAX = 180
 BURST_CHANCE = 0.28               // ~28% of gaps are bursts (multiple targets on screen)
-SPEED_BONUS_MAX_MS = 350          // click within this → 2x multiplier
-SPEED_BONUS_MIN_MS = 2000         // click after this → 1x multiplier
+SPEED_BONUS_PEAK = 100            // max additive speed bonus, awarded near-instantly
+SPEED_DECAY_MS = 600              // exponential decay time constant (ms) for speed bonus
 MISS_PENALTY = 50                 // pts deducted per miss (click-miss or expiry), score floors at 0
 TARGET_RADIUS = 44                // px, base target size
 RING_RADII = [10, 20, 32, 44]    // px radii for each ring zone (bullseye→outer)
