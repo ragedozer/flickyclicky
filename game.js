@@ -19,21 +19,21 @@ const LB_NAME_MAX_LEN = 16;
 const TARGETS_PER_ROUND   = 18;
 const TARGET_RADIUS       = 44;
 const RING_RADII          = [10, 20, 32, TARGET_RADIUS];
-const RING_POINTS         = [100, 75, 50, 25];
 const POPUP_DURATION      = 1900;
 const SPAWN_GAP_MIN       = 750;
 const SPAWN_GAP_MAX       = 2000;
 const BURST_GAP_MIN       = 0;    // targets that nearly overlap
 const BURST_GAP_MAX       = 180;
 const BURST_CHANCE        = 0.28; // ~28% of gaps are bursts
-const SPEED_BONUS_PEAK    = 250;  // max speed bonus, awarded near-instantly
-const SPEED_DECAY_MS      = 350;  // exponential decay time constant (ms)
+const SPEED_PEAK          = 200;  // base speed score, awarded near-instantly
+const SPEED_DECAY_MS      = 300;  // exponential decay time constant (ms)
+const ACCURACY_MULT       = [1.5, 1.2, 1.0, 0.8]; // bullseye -> outer ring multiplier
 const TYPE_SCORE_MULT     = { popup: 1, drifter: 1.2, flyby: 1.35 }; // moving-target bonus
 const DRIFTER_SPEED_RANGE = [90, 160];
 const FLYBY_SPEED_RANGE   = [250, 380];
 const CANVAS_W            = 700;
 const CANVAS_H            = 420;
-const MAX_SCORE           = TARGETS_PER_ROUND * RING_POINTS[0] * 2;
+const MAX_SCORE           = 3600;
 const MISS_PENALTY        = 50;
 
 const TYPE_POOL = [
@@ -470,10 +470,11 @@ function scoreHit(distFromCenter, reactionMs, type) {
   for (let i = 0; i < RING_RADII.length; i++) {
     if (distFromCenter <= RING_RADII[i]) { ringIndex = i; break; }
   }
-  const base       = RING_POINTS[ringIndex];
-  const speedBonus = SPEED_BONUS_PEAK * Math.exp(-Math.max(0, reactionMs) / SPEED_DECAY_MS);
-  const typeMult   = TYPE_SCORE_MULT[type] ?? 1;
-  return { ringIndex, base, speedBonus, total: Math.round((base + speedBonus) * typeMult) };
+  const speedScore   = SPEED_PEAK * Math.exp(-Math.max(0, reactionMs) / SPEED_DECAY_MS);
+  const accuracyMult = ACCURACY_MULT[ringIndex];
+  const typeMult     = TYPE_SCORE_MULT[type] ?? 1;
+  const mult         = accuracyMult * typeMult;
+  return { ringIndex, speedScore, mult, total: Math.round(speedScore * mult) };
 }
 
 function calcGrade(score) {
@@ -657,7 +658,7 @@ function onCanvasClick(e) {
   score = Math.min(MAX_SCORE, score + result.total);
   combo++;
   missStreak = 0;
-  hitLog.push({ ringIndex: result.ringIndex, score: result.total, reactionMs: hitAge, type: tgt.type });
+  hitLog.push({ ringIndex: result.ringIndex, score: result.total, speedScore: result.speedScore, mult: result.mult, reactionMs: hitAge, type: tgt.type });
 
   scoreEl.textContent = score;
   spawnHitParticles(hitCx, hitCy, result.ringIndex, scale);
@@ -901,8 +902,8 @@ function buildBreakdownTable(log) {
     const typeLabel = { popup: 'pop', drifter: 'drft', flyby: 'fly' }[t.type] ?? '?';
     const timeStr   = t.reactionMs != null ? `${(t.reactionMs/1000).toFixed(2)}s` : '—';
     const ptClass   = isMiss        ? 'pts-miss'
-                    : t.score >= 180 ? 'pts-max'
-                    : t.score >= 100 ? 'pts-high'
+                    : t.score >= 250 ? 'pts-max'
+                    : t.score >= 120 ? 'pts-high'
                     : 'pts-mid';
 
     row.innerHTML = `
@@ -941,14 +942,15 @@ function showResults(result, playFanfare = false) {
   document.getElementById('emoji-grid').textContent = rows.join('\n');
 
   const hits     = result.targets.filter(t => t.ringIndex != null);
-  const accPts   = hits.reduce((s, t) => s + RING_POINTS[t.ringIndex], 0);
   const missPen  = result.missPenalty ?? (result.targets.filter(t => t.ringIndex == null).length * MISS_PENALTY);
-  const spdPts   = result.totalScore - accPts + missPen;
+  const speedPts = hits.reduce((s, t) => s + Math.round(t.speedScore ?? 0), 0);
+  const avgMult  = hits.length ? hits.reduce((s, t) => s + (t.mult ?? 1), 0) / hits.length : 1;
   const avgReact = hits.length
     ? hits.reduce((s, t) => s + t.reactionMs, 0) / hits.length : null;
 
-  document.getElementById('stat-acc').textContent   = accPts.toLocaleString();
-  document.getElementById('stat-spd').textContent   = '+' + spdPts.toLocaleString();
+  const modPct = Math.round((avgMult - 1) * 100);
+  document.getElementById('stat-acc').textContent   = `${modPct >= 0 ? '+' : ''}${modPct}%`;
+  document.getElementById('stat-spd').textContent   = speedPts.toLocaleString();
   document.getElementById('stat-hits').textContent  = `${hits.length}/${TARGETS_PER_ROUND}`;
   document.getElementById('stat-pen').textContent   = missPen > 0 ? `-${missPen}` : '0';
   document.getElementById('stat-react').textContent = avgReact != null

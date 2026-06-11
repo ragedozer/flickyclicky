@@ -20,17 +20,20 @@ A daily web-based clicking speed and accuracy game. Each day everyone in the wor
 
 ## Scoring
 
-- Bullseye ring: 100 pts base
-- Inner ring: 75 pts
-- Mid ring: 50 pts
-- Outer ring: 25 pts
-- Speed bonus: additive, up to 250 pts, decaying exponentially with reaction time
-  (`SPEED_BONUS_PEAK * e^(-reactionMs / SPEED_DECAY_MS)`) — heavily rewards fast "flick"
-  clicks, e.g. a quick outer-ring flick at 400ms (25 + ~80 = 105) beats a bullseye held
-  to the last second at 1900ms (100 + ~1 = 101)
-- Moving-target bonus: (base + speed bonus) is multiplied by `TYPE_SCORE_MULT`
-  (drifter ×1.2, flyby ×1.35, popup ×1) — rewards hitting harder, moving targets
-- Max possible per target: 350 pts (popup bullseye + instant); higher for drifter/flyby
+Speed is the primary score driver; accuracy and target type act as multipliers on top
+of it.
+
+- Speed score: `SPEED_PEAK * e^(-reactionMs / SPEED_DECAY_MS)` — up to 200 pts,
+  decaying exponentially with reaction time. Clicking within ~300ms scores near the
+  full 200; by ~2000ms it's near 0.
+- Accuracy multiplier (`ACCURACY_MULT`, by ring): bullseye ×1.5, inner ×1.2, mid ×1.0,
+  outer ×0.8 — accuracy nudges the speed score up or down by up to ±50%, but can't
+  rescue a slow click.
+- Moving-target multiplier (`TYPE_SCORE_MULT`): drifter ×1.2, flyby ×1.35, popup ×1 —
+  stacks with the accuracy multiplier.
+- Total per hit: `round(speedScore * accuracyMult * typeMult)`.
+- Max possible per target: 405 pts (flyby bullseye + instant, 200 × 1.5 × 1.35); popup
+  bullseye + instant is 300.
 - Max total (18 targets): 3600 pts (running total is clamped to this cap)
 
 ## Daily Seed System
@@ -210,8 +213,9 @@ SPAWN_GAP_MAX = 2000
 BURST_GAP_MIN = 0                 // nearly-simultaneous burst gap
 BURST_GAP_MAX = 180
 BURST_CHANCE = 0.28               // ~28% of gaps are bursts (multiple targets on screen)
-SPEED_BONUS_PEAK = 250            // max additive speed bonus, awarded near-instantly
-SPEED_DECAY_MS = 350              // exponential decay time constant (ms) for speed bonus
+SPEED_PEAK = 200                  // max speed score, awarded near-instantly
+SPEED_DECAY_MS = 300              // exponential decay time constant (ms) for speed score
+ACCURACY_MULT = [1.5, 1.2, 1.0, 0.8] // accuracy multiplier by ring (bullseye→outer)
 TYPE_SCORE_MULT = { popup: 1, drifter: 1.2, flyby: 1.35 } // moving-target score multiplier
 MISS_PENALTY = 50                 // pts deducted per miss (click-miss or expiry), score floors at 0
 TARGET_RADIUS = 44                // px, base target size
