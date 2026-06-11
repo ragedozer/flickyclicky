@@ -2,7 +2,7 @@
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
-const SHARE_URL = 'https://placeholder.url';
+const SHARE_URL = 'https://flickyclicky.vercel.app/';
 
 // Replace with your Firebase project's web app config (Project settings → General →
 // Your apps → SDK setup and configuration → Config). Leaving this as the placeholder

@@ -186,12 +186,14 @@ service cloud.firestore {
 }
 ```
 
-### Phase 4 — Deployment
+### Phase 4 — Deployment ✅ complete
 
-**Sprint 7: Hosting**
-- Static deploy (Netlevel/Vercel/GitHub Pages)
-- Real URL replaces placeholder
-- Open Graph meta tags for link previews
+**Sprint 7: Hosting** ✅
+- Repo pushed to GitHub (`ragedozer/flickyclicky`), connected to Vercel for
+  auto-deploy on push to `main`
+- Live at https://flickyclicky.vercel.app/
+- `SHARE_URL` in `game.js` updated to the live URL
+- Open Graph + Twitter card meta tags added to `index.html`
 
 ## Key Constants (tunable)
 
