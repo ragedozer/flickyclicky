@@ -373,6 +373,7 @@ kbd {
   to   { transform: scale(1)   rotate(0deg);   opacity: 1; }
 }
 
+.grade-SS { color: var(--gold); text-shadow: 0 0 20px var(--glow-gold), 0 0 40px var(--glow-gold); }
 .grade-S { color: var(--gold);  text-shadow: 0 0 20px var(--glow-gold); }
 .grade-A { color: var(--green); text-shadow: 0 0 20px var(--glow-green); }
 .grade-B { color: var(--green-b); }

@@ -24,8 +24,9 @@ Speed is the primary score driver; accuracy and target type act as multipliers o
 of it.
 
 - Speed score: `SPEED_PEAK * e^(-reactionMs / SPEED_DECAY_MS)` — up to 200 pts,
-  decaying exponentially with reaction time. A ~300ms reaction scores around 130; by
-  ~2000ms it's near 0.
+  decaying exponentially with reaction time. A ~300ms reaction scores around 150, a
+  ~600ms reaction (typical human average) still scores around 110; by ~2000ms it's
+  down near 25.
 - Accuracy multiplier (`ACCURACY_MULT`, by ring): bullseye ×1.5, inner ×1.2, mid ×1.0,
   outer ×0.8 — accuracy nudges the speed score up or down by up to ±50%, but can't
   rescue a slow click.
@@ -78,13 +79,14 @@ of it.
 
 ## Grade Tiers
 
-| Score % | Grade |
-|---------|-------|
-| 90–100  | S     |
-| 75–89   | A     |
-| 55–74   | B     |
-| 35–54   | C     |
-| <35     | D     |
+| Score range   | Grade |
+|---------------|-------|
+| 3600 (100%)   | SS    |
+| 3400–3599     | S     |
+| 2700–3399     | A     |
+| 1980–2699     | B     |
+| 1260–1979     | C     |
+| <1260         | D     |
 
 ## Tech Stack
 
@@ -240,7 +242,7 @@ BURST_GAP_MIN = 0                 // nearly-simultaneous burst gap
 BURST_GAP_MAX = 180
 BURST_CHANCE = 0.28               // ~28% of gaps are bursts (multiple targets on screen)
 SPEED_PEAK = 200                  // max speed score, awarded near-instantly
-SPEED_DECAY_MS = 700              // exponential decay time constant (ms) for speed score
+SPEED_DECAY_MS = 1000             // exponential decay time constant (ms) for speed score
 ACCURACY_MULT = [1.5, 1.2, 1.0, 0.8] // accuracy multiplier by ring (bullseye→outer)
 TYPE_SCORE_MULT = { popup: 1, drifter: 1.2, flyby: 1.35 } // moving-target score multiplier
 MISS_PENALTY = 50                 // pts deducted per miss (click-miss or expiry), score floors at 0

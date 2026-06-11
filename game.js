@@ -26,7 +26,7 @@ const BURST_GAP_MIN       = 0;    // targets that nearly overlap
 const BURST_GAP_MAX       = 180;
 const BURST_CHANCE        = 0.28; // ~28% of gaps are bursts
 const SPEED_PEAK          = 200;  // base speed score, awarded near-instantly
-const SPEED_DECAY_MS      = 700;  // exponential decay time constant (ms)
+const SPEED_DECAY_MS      = 1000; // exponential decay time constant (ms)
 const ACCURACY_MULT       = [1.5, 1.2, 1.0, 0.8]; // bullseye -> outer ring multiplier
 const TYPE_SCORE_MULT     = { popup: 1, drifter: 1.2, flyby: 1.35 }; // moving-target bonus
 const DRIFTER_SPEED_RANGE = [90, 160];
@@ -46,11 +46,12 @@ const RING_EMOJI = ['🎯', '✅', '🟡', '⭕'];
 const MISS_EMOJI = '❌';
 
 const GRADE_THRESHOLDS = [
-  [0.90, 'S'],
-  [0.75, 'A'],
-  [0.55, 'B'],
-  [0.35, 'C'],
-  [0,    'D'],
+  [1,        'SS'],
+  [3400/3600,'S'],
+  [0.75,     'A'],
+  [0.55,     'B'],
+  [0.35,     'C'],
+  [0,        'D'],
 ];
 
 const TYPE_THEME = {
@@ -205,6 +206,7 @@ function playCountdown(isGo) {
 function playResultFanfare(grade) {
   ensureAudio();
   const seqs = {
+    SS: [523, 659, 784, 1047, 1319],
     S: [523, 659, 784, 1047],
     A: [440, 554, 659, 880],
     B: [392, 494, 587],
