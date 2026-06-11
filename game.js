@@ -479,6 +479,25 @@ function todayKey() {
   return `ds_${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
+function startResetCountdown() {
+  const el = document.getElementById('reset-countdown');
+  el.style.display = '';
+
+  function tick() {
+    const now      = new Date();
+    const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0);
+    const msLeft   = midnight - now;
+    const hours    = Math.floor(msLeft / 3600000);
+    const minutes  = Math.floor((msLeft % 3600000) / 60000);
+    el.textContent = hours > 0
+      ? `Resets in ${hours}h ${minutes}m`
+      : `Resets in ${minutes}m`;
+  }
+
+  tick();
+  setInterval(tick, 30000);
+}
+
 function loadResult(key) {
   try { return JSON.parse(localStorage.getItem(key)); } catch { return null; }
 }
@@ -1234,6 +1253,7 @@ function init() {
     prevGrade.className    = `grade-${existing.grade}`;
     prevScore.textContent  = `${existing.totalScore.toLocaleString()} / ${MAX_SCORE.toLocaleString()}`;
     document.getElementById('start-btn').textContent = 'View Scores';
+    startResetCountdown();
   }
 
   state     = 'idle';
