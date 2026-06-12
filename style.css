@@ -373,6 +373,19 @@ kbd {
   to   { transform: scale(1)   rotate(0deg);   opacity: 1; }
 }
 
+#result-grade.grade-God {
+  background: linear-gradient(90deg, #ff5e5e, #ffd700, #5ef0a0, #5ec8ff, #c084ff, #ff5e5e);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 30px var(--glow-gold), 0 0 60px var(--glow-gold);
+  animation: grade-pop .45s cubic-bezier(.2,1.6,.4,1) both, god-shimmer 3s linear infinite;
+}
+@keyframes god-shimmer {
+  from { background-position: 0% 0; }
+  to   { background-position: 300% 0; }
+}
 .grade-SS { color: var(--gold); text-shadow: 0 0 20px var(--glow-gold), 0 0 40px var(--glow-gold); }
 .grade-S { color: var(--gold);  text-shadow: 0 0 20px var(--glow-gold); }
 .grade-A { color: var(--green); text-shadow: 0 0 20px var(--glow-green), 0 0 40px var(--glow-green); }

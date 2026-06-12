@@ -46,7 +46,8 @@ const RING_EMOJI = ['🎯', '✅', '🟡', '⭕'];
 const MISS_EMOJI = '❌';
 
 const GRADE_THRESHOLDS = [
-  [1,        'SS'],
+  [1,        'God'],
+  [3400/3600,'SS'],
   [3000/3600,'S'],
   [2600/3600,'A'],
   [0.55,     'B'],
@@ -207,6 +208,7 @@ function playResultFanfare(grade) {
   if (grade === 'B') return;
   ensureAudio();
   const seqs = {
+    God: [523, 659, 784, 1047, 1319, 1568],
     SS: [523, 659, 784, 1047, 1319],
     S: [523, 659, 784, 1047],
     A: [440, 554, 659, 880],
