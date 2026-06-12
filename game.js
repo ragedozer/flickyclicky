@@ -204,12 +204,12 @@ function playCountdown(isGo) {
 }
 
 function playResultFanfare(grade) {
+  if (grade === 'B') return;
   ensureAudio();
   const seqs = {
     SS: [523, 659, 784, 1047, 1319],
     S: [523, 659, 784, 1047],
     A: [440, 554, 659, 880],
-    B: [392, 494, 587],
     C: [330, 392, 494],
     D: [262, 294, 330],
   };
