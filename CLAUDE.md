@@ -60,6 +60,10 @@ of it.
   for misses. The single best-scoring target is highlighted.
 - Animated score count-up with fanfare sounds per grade; letter grade with pop
   animation
+- Grade styling: `God` (3600) gets an animated rainbow-gradient shimmer + glow and a
+  6-note fanfare; `SS`/`S` get a gold glow + fanfare; `A` gets a green double-glow +
+  fanfare; `B` gets a subtle single glow with **no fanfare**; `C`/`D` are plain with a
+  fanfare
 - 7-day history strip from localStorage (shows score under grade, today highlighted)
 
 ## Share Feature
